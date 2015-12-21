@@ -32,6 +32,7 @@ public class AlexandriaContract{
                 "vnd.android.cursor.item/" + CONTENT_AUTHORITY + "/" + PATH_BOOKS;
 
         public static final String TABLE_NAME = "books";
+        public static final String SAVED = "saved";
 
         public static final String TITLE = "title";
 

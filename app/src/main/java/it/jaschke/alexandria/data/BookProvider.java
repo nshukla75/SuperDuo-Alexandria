@@ -3,6 +3,7 @@ package it.jaschke.alexandria.data;
 import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -140,6 +141,7 @@ public class BookProvider extends ContentProvider {
                 break;
             case BOOK_FULLDETAIL:
                 String[] bfd_projection ={
+                    AlexandriaContract.BookEntry.TABLE_NAME + "." + AlexandriaContract.BookEntry.SAVED,
                     AlexandriaContract.BookEntry.TABLE_NAME + "." + AlexandriaContract.BookEntry.TITLE,
                     AlexandriaContract.BookEntry.TABLE_NAME + "." + AlexandriaContract.BookEntry.SUBTITLE,
                     AlexandriaContract.BookEntry.TABLE_NAME + "." + AlexandriaContract.BookEntry.IMAGE_URL,
@@ -157,6 +159,7 @@ public class BookProvider extends ContentProvider {
                 break;
             case BOOK_FULL:
                 String[] bf_projection ={
+                        AlexandriaContract.BookEntry.TABLE_NAME + "." + AlexandriaContract.BookEntry.SAVED,
                         AlexandriaContract.BookEntry.TABLE_NAME + "." + AlexandriaContract.BookEntry.TITLE,
                         AlexandriaContract.BookEntry.TABLE_NAME + "." + AlexandriaContract.BookEntry.IMAGE_URL,
                         "group_concat(DISTINCT " + AlexandriaContract.AuthorEntry.TABLE_NAME+ "."+ AlexandriaContract.AuthorEntry.AUTHOR + ") as " + AlexandriaContract.AuthorEntry.AUTHOR,
@@ -218,7 +221,10 @@ public class BookProvider extends ContentProvider {
                 } else {
                     throw new android.database.SQLException("Failed to insert row into " + uri);
                 }
-                getContext().getContentResolver().notifyChange(AlexandriaContract.BookEntry.buildFullBookUri(_id), null);
+                Context context = getContext();
+                if (context != null) {
+                    context.getContentResolver().notifyChange(AlexandriaContract.BookEntry.buildFullBookUri(_id), null);
+                }
                 break;
             }
             case AUTHOR:{
@@ -251,15 +257,21 @@ public class BookProvider extends ContentProvider {
         switch (match) {
             case BOOK:
                 rowsDeleted = db.delete(
-                        AlexandriaContract.BookEntry.TABLE_NAME, selection, selectionArgs);
+                        AlexandriaContract.BookEntry.TABLE_NAME,
+                        selection,
+                        selectionArgs);
                 break;
             case AUTHOR:
                 rowsDeleted = db.delete(
-                        AlexandriaContract.AuthorEntry.TABLE_NAME, selection, selectionArgs);
+                        AlexandriaContract.AuthorEntry.TABLE_NAME,
+                        selection,
+                        selectionArgs);
                 break;
             case CATEGORY:
                 rowsDeleted = db.delete(
-                        AlexandriaContract.CategoryEntry.TABLE_NAME, selection, selectionArgs);
+                        AlexandriaContract.CategoryEntry.TABLE_NAME,
+                        selection,
+                        selectionArgs);
                 break;
             case BOOK_ID:
                 rowsDeleted = db.delete(
@@ -272,7 +284,10 @@ public class BookProvider extends ContentProvider {
         }
         // Because a null deletes all rows
         if (selection == null || rowsDeleted != 0) {
-            getContext().getContentResolver().notifyChange(uri, null);
+            Context context = getContext();
+            if (context != null) {
+                context.getContentResolver().notifyChange(uri, null);
+            }
         }
         return rowsDeleted;
     }
@@ -300,7 +315,10 @@ public class BookProvider extends ContentProvider {
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
         if (rowsUpdated != 0) {
-            getContext().getContentResolver().notifyChange(uri, null);
+            Context context = getContext();
+            if (context != null) {
+                context.getContentResolver().notifyChange(uri, null);
+            }
         }
         return rowsUpdated;
     }
