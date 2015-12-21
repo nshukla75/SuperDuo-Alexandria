@@ -12,12 +12,16 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import it.jaschke.alexandria.R;
+import it.jaschke.alexandria.Utility;
 import it.jaschke.alexandria.adapter.Callback;
 import it.jaschke.alexandria.fragments.About;
 import it.jaschke.alexandria.fragments.AddBook;
@@ -26,7 +30,7 @@ import it.jaschke.alexandria.fragments.ListOfBooks;
 import it.jaschke.alexandria.fragments.NavigationDrawerFragment;
 
 
-public class MainActivity extends ActionBarActivity implements NavigationDrawerFragment.NavigationDrawerCallbacks, Callback {
+public class MainActivity extends AppCompatActivity implements NavigationDrawerFragment.NavigationDrawerCallbacks, Callback {
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -36,7 +40,12 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
     /**
      * Used to store the last screen title. For use in {@link #restoreActionBar()}.
      */
-    private CharSequence title;
+    // used to store the last screen mTitle
+    private String mTitle;
+
+    // reference to the app title textview in the toolbar
+    private TextView mToolbarTitle;
+
     public static boolean IS_TABLET = false;
     private BroadcastReceiver messageReciever;
 
@@ -53,17 +62,29 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
             setContentView(R.layout.activity_main);
         }
 
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        //setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+
+        mToolbarTitle = (TextView) findViewById(R.id.toolbar_title);
+
         messageReciever = new MessageReciever();
         IntentFilter filter = new IntentFilter(MESSAGE_EVENT);
-        LocalBroadcastManager.getInstance(this).registerReceiver(messageReciever,filter);
+        LocalBroadcastManager.getInstance(this).registerReceiver(messageReciever, filter);
 
         navigationDrawerFragment = (NavigationDrawerFragment)
                 getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
-        title = getTitle();
+        mTitle = (String)getTitle();
+
+        // set the toolbar title to the name of the app
+        mToolbarTitle.setText(R.string.app_name);
 
         // Set up the drawer.
         navigationDrawerFragment.setUp(R.id.navigation_drawer,
-                    (DrawerLayout) findViewById(R.id.drawer_layout));
+                (DrawerLayout) findViewById(R.id.drawer_layout));
     }
 
     @Override
@@ -88,21 +109,13 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
 
         fragmentManager.beginTransaction()
                 .replace(R.id.container, nextFragment)
-                .addToBackStack((String) title)
+                .addToBackStack((String) mTitle)
                 .commit();
     }
 
     public void setTitle(int titleId) {
-        title = getString(titleId);
+        mTitle = getString(titleId);
     }
-
-    public void restoreActionBar() {
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
-        actionBar.setDisplayShowTitleEnabled(true);
-        actionBar.setTitle(title);
-    }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -111,7 +124,11 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
             // if the drawer is not showing. Otherwise, let the drawer
             // decide what to show in the action bar.
             getMenuInflater().inflate(R.menu.main, menu);
-            restoreActionBar();
+            // restore the toolbar title
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setDisplayShowTitleEnabled(false);
+                mToolbarTitle.setText(mTitle);
+            }
             return true;
         }
         return super.onCreateOptionsMenu(menu);
@@ -127,9 +144,31 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
         if (id == R.id.action_settings) {
             startActivity(new Intent(this, SettingsActivity.class));
             return true;
+        }else if (item.getItemId() == android.R.id.home) {
+
+            // hide keyboard when the drawer is opened
+            Utility.hideKeyboardFromActivity(this);
+
+            // if we are not on a tablet in landscape mode
+            if(findViewById(R.id.right_container) == null) {
+
+                // if we are coming back from the bookdetail fragment, reset the hamburger
+                if (mTitle.equals(getString(R.string.detail))) {
+                    getSupportFragmentManager().popBackStack();
+                    toggleToolbarDrawerIndicator(false);
+                    return true;
+                }
+            }
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void toggleToolbarDrawerIndicator(boolean backToHome) {
+        // if we are not on a tablet in landscape mode
+        if(findViewById(R.id.right_container) == null) {
+            navigationDrawerFragment.toggleToolbarDrawerIndicator(backToHome);
+        }
     }
 
     @Override
