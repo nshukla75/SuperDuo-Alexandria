@@ -8,6 +8,7 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -28,9 +29,14 @@ import it.jaschke.alexandria.fragments.AddBook;
 import it.jaschke.alexandria.fragments.BookDetail;
 import it.jaschke.alexandria.fragments.ListOfBooks;
 import it.jaschke.alexandria.fragments.NavigationDrawerFragment;
+import it.jaschke.alexandria.services.BookService;
 
 
-public class MainActivity extends AppCompatActivity implements NavigationDrawerFragment.NavigationDrawerCallbacks, Callback {
+public class MainActivity extends AppCompatActivity implements
+        NavigationDrawerFragment.NavigationDrawerCallbacks,
+        Callback {
+    // use classname when logging
+    private static final String LOG_TAG = MainActivity.class.getSimpleName();
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -38,7 +44,7 @@ public class MainActivity extends AppCompatActivity implements NavigationDrawerF
     private NavigationDrawerFragment navigationDrawerFragment;
 
     /**
-     * Used to store the last screen title. For use in {@link #restoreActionBar()}.
+     * Used to store the last screen title.
      */
     // used to store the last screen mTitle
     private String mTitle;
@@ -47,10 +53,16 @@ public class MainActivity extends AppCompatActivity implements NavigationDrawerF
     private TextView mToolbarTitle;
 
     public static boolean IS_TABLET = false;
+
     private BroadcastReceiver messageReciever;
 
     public static final String MESSAGE_EVENT = "MESSAGE_EVENT";
     public static final String MESSAGE_KEY = "MESSAGE_EXTRA";
+
+    // drawer position constants
+    public static final int BOOKLIST_FRAGMENT_POSITION = 0;
+    public static final int ADDBOOK_FRAGMENT_POSITION = 1;
+    public static final int ABOUT_FRAGMENT_POSITION = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,32 +97,40 @@ public class MainActivity extends AppCompatActivity implements NavigationDrawerF
         // Set up the drawer.
         navigationDrawerFragment.setUp(R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
+
+        // send message to bookservice to delete existing not-saved books from previous session
+        Intent bookIntent = new Intent(this, BookService.class);
+        bookIntent.setAction(BookService.DELETE_NOT_SAVED);
+        startService(bookIntent);
+
+        // prevent the keyboard from appearing already oncreate mainactivity
+        Utility.hideKeyboardFromActivity(this);
     }
 
     @Override
     public void onNavigationDrawerItemSelected(int position) {
 
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        Fragment nextFragment;
-
+        // choose the selected fragment based on given position
+        Fragment choosenFragment;
         switch (position){
             default:
-            case 0:
-                nextFragment = new ListOfBooks();
+            case BOOKLIST_FRAGMENT_POSITION:
+                choosenFragment = new ListOfBooks();
                 break;
-            case 1:
-                nextFragment = new AddBook();
+            case ADDBOOK_FRAGMENT_POSITION:
+                choosenFragment = new AddBook();
                 break;
-            case 2:
-                nextFragment = new About();
+            case ABOUT_FRAGMENT_POSITION:
+                choosenFragment = new About();
                 break;
 
         }
-
+        FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()
-                .replace(R.id.container, nextFragment)
+                .replace(R.id.container, choosenFragment)
                 .addToBackStack((String) mTitle)
                 .commit();
+        Utility.hideKeyboardFromActivity(this);
     }
 
     public void setTitle(int titleId) {
@@ -120,9 +140,6 @@ public class MainActivity extends AppCompatActivity implements NavigationDrawerF
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         if (!navigationDrawerFragment.isDrawerOpen()) {
-            // Only show items in the action bar relevant to this screen
-            // if the drawer is not showing. Otherwise, let the drawer
-            // decide what to show in the action bar.
             getMenuInflater().inflate(R.menu.main, menu);
             // restore the toolbar title
             if (getSupportActionBar() != null) {
@@ -189,10 +206,17 @@ public class MainActivity extends AppCompatActivity implements NavigationDrawerF
         if(findViewById(R.id.right_container) != null){
             id = R.id.right_container;
         }
-        getSupportFragmentManager().beginTransaction()
-                .replace(id, fragment)
-                .addToBackStack("Book Detail")
-                .commit();
+        // replace the contents of the container element with the detail fragment and add it to the backstack
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.replace(id, fragment);
+        fragmentTransaction.addToBackStack(getString(R.string.detail));
+        fragmentTransaction.commit();
+
+        // toggle the hamburger icon for the back icon
+        toggleToolbarDrawerIndicator(true);
+
+        // hide the keyboard when we navigate to the bookdetail fragment
+        Utility.hideKeyboardFromActivity(this);
 
     }
 
@@ -205,9 +229,6 @@ public class MainActivity extends AppCompatActivity implements NavigationDrawerF
         }
     }
 
-    public void goBack(View view){
-        getSupportFragmentManager().popBackStack();
-    }
 
     private boolean isTablet() {
         return (getApplicationContext().getResources().getConfiguration().screenLayout
