@@ -14,19 +14,24 @@ import com.bumptech.glide.Glide;
 
 import it.jaschke.alexandria.R;
 import it.jaschke.alexandria.data.AlexandriaContract;
-import it.jaschke.alexandria.services.DownloadImage;
+
 
 /**
- * Created by saj on 11/01/15.
+ * BookListAdapter class for populating the book list items
  */
 public class BookListAdapter extends CursorAdapter {
 
     // keep the activity context
     final private Context mContext;
-
     // empty view for when we have no data and want to inform the user
     final private View mEmptyView;
 
+    /**
+     * Constructor
+     * @param context Context
+     * @param c Cursor
+     * @param flags int
+     */
     public BookListAdapter(Context context, Cursor c, int flags, View emptyView) {
         super(context, c, flags);
         mContext = context;
@@ -34,9 +39,11 @@ public class BookListAdapter extends CursorAdapter {
 
         // show or hide the empty view, depending on empty cursor
         mEmptyView.setVisibility(c.getCount() == 0 ? View.VISIBLE : View.GONE);
-
     }
 
+    /**
+     * Helper class for references to the view items
+     */
     public static class ViewHolder {
         public final ImageView bookCover;
         public final TextView bookTitle;
@@ -49,37 +56,53 @@ public class BookListAdapter extends CursorAdapter {
         }
     }
 
-
-
+    /**
+     * Populate the view items from cursor data
+     * @param view View
+     * @param context Context
+     * @param cursor Cursor
+     */
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-
+        // get references to the view items in the layout as defined in the viewholder
         ViewHolder viewHolder = (ViewHolder) view.getTag();
-
+        // set the book cover image
         String imgUrl = cursor.getString(cursor.getColumnIndex(AlexandriaContract.BookEntry.IMAGE_URL));
         Glide.with(mContext)
                 .load(imgUrl)
                 .error(R.drawable.cover_not_available)
                 .crossFade()
                 .into(viewHolder.bookCover);
-
+        // set the book title
         String bookTitle = cursor.getString(cursor.getColumnIndex(AlexandriaContract.BookEntry.TITLE));
         viewHolder.bookTitle.setText(bookTitle);
-
+        // set the book subtitle
         String bookSubTitle = cursor.getString(cursor.getColumnIndex(AlexandriaContract.BookEntry.SUBTITLE));
         viewHolder.bookSubTitle.setText(bookSubTitle);
     }
 
+    /**
+     * Inflate a new book_list_item view based on the definition in the viewholder inner class
+     * @param context Context
+     * @param cursor Cursor
+     * @param parent ViewGroup
+     * @return View
+     */
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
+        // get the view layout
         View view = LayoutInflater.from(context).inflate(R.layout.book_list_item, parent, false);
-
+        // set references to the view items in the layout as defined in the viewholder
         ViewHolder viewHolder = new ViewHolder(view);
         view.setTag(viewHolder);
-
         return view;
     }
 
+    /**
+     * Override the swapCursor so we can detect if we have an empty cursor and show a notice
+     * @param newCursor Cursor
+     * @return Cursor
+     */
     @Override
     public Cursor swapCursor(Cursor newCursor) {
 
@@ -87,7 +110,6 @@ public class BookListAdapter extends CursorAdapter {
         if (newCursor != null) {
             mEmptyView.setVisibility(newCursor.getCount() == 0 ? View.VISIBLE : View.GONE);
         }
-
         return super.swapCursor(newCursor);
     }
 }
