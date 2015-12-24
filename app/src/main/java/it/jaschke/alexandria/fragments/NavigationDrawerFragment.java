@@ -30,6 +30,9 @@ import it.jaschke.alexandria.R;
  */
 public class NavigationDrawerFragment extends Fragment {
 
+    // use classname when logging
+    private static final String LOG_TAG = NavigationDrawerFragment.class.getSimpleName();
+
     /**
      * Remember the position of the selected item.
      */
@@ -58,6 +61,16 @@ public class NavigationDrawerFragment extends Fragment {
     private int mCurrentSelectedPosition = 0;
     private boolean mFromSavedInstanceState;
     private boolean mUserLearnedDrawer;
+    /**
+     * Callbacks interface that all activities using this fragment must implement
+     */
+    public interface Callbacks {
+        /**
+         * Called when an item in the navigation drawer is selected
+         * @param position int
+         */
+        void onNavigationDrawerItemSelected(int position);
+    }
 
     public NavigationDrawerFragment() {
     }
@@ -70,8 +83,6 @@ public class NavigationDrawerFragment extends Fragment {
         // drawer. See PREF_USER_LEARNED_DRAWER for details.
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
         mUserLearnedDrawer = sp.getBoolean(PREF_USER_LEARNED_DRAWER, false);
-
-
 
         if (savedInstanceState != null) {
             mCurrentSelectedPosition = savedInstanceState.getInt(STATE_SELECTED_POSITION);
@@ -202,25 +213,8 @@ public class NavigationDrawerFragment extends Fragment {
         if (mDrawerLayout != null) {
             mDrawerLayout.closeDrawer(mFragmentContainerView);
         }
-        if (mCallbacks != null) {
-            mCallbacks.onNavigationDrawerItemSelected(position);
-        }
-    }
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        try {
-            mCallbacks = (NavigationDrawerCallbacks) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException("Activity must implement NavigationDrawerCallbacks.");
-        }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mCallbacks = null;
+        // select the chosen fragment in the main activity (using the callback interface)
+        ((Callbacks) getActivity()).onNavigationDrawerItemSelected(position);
     }
 
     @Override

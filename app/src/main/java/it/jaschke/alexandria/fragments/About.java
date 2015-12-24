@@ -19,14 +19,13 @@ public class About extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_about, container, false);
-        return rootView;
-    }
 
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        activity.setTitle(R.string.about);
+        // set the about fragment as the root view
+        View rootView = inflater.inflate(R.layout.fragment_about, container, false);
+
+        // set the title of the mainactivity actionbar
+        getActivity().setTitle(R.string.about);
+        return rootView;
     }
 
 }

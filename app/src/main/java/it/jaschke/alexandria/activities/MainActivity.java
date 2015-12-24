@@ -33,8 +33,9 @@ import it.jaschke.alexandria.services.BookService;
 
 
 public class MainActivity extends AppCompatActivity implements
-        NavigationDrawerFragment.NavigationDrawerCallbacks,
-        Callback {
+        NavigationDrawerFragment.Callbacks,
+        ListOfBooks.Callbacks,
+        BookDetail.Callbacks {
     // use classname when logging
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
 
@@ -42,6 +43,10 @@ public class MainActivity extends AppCompatActivity implements
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
      */
     private NavigationDrawerFragment navigationDrawerFragment;
+
+    // when we rotate from portrait to landscape on a tablet we can keep the selected book here
+    private String mEan;
+    private String mBookTitle;
 
     /**
      * Used to store the last screen title.
@@ -195,9 +200,13 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onItemSelected(String ean) {
+    public void onItemSelected(String ean, String title) {
+        mEan = ean;
+        mBookTitle = title;
+        // create a bundle to pass the ean to the detail fragment
         Bundle args = new Bundle();
         args.putString(BookDetail.EAN_KEY, ean);
+        args.putString(BookDetail.TITLE_KEY, title);
 
         BookDetail fragment = new BookDetail();
         fragment.setArguments(args);

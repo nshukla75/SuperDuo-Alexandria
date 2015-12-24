@@ -10,6 +10,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+
 import it.jaschke.alexandria.R;
 import it.jaschke.alexandria.data.AlexandriaContract;
 import it.jaschke.alexandria.services.DownloadImage;
@@ -19,6 +21,21 @@ import it.jaschke.alexandria.services.DownloadImage;
  */
 public class BookListAdapter extends CursorAdapter {
 
+    // keep the activity context
+    final private Context mContext;
+
+    // empty view for when we have no data and want to inform the user
+    final private View mEmptyView;
+
+    public BookListAdapter(Context context, Cursor c, int flags, View emptyView) {
+        super(context, c, flags);
+        mContext = context;
+        mEmptyView = emptyView;
+
+        // show or hide the empty view, depending on empty cursor
+        mEmptyView.setVisibility(c.getCount() == 0 ? View.VISIBLE : View.GONE);
+
+    }
 
     public static class ViewHolder {
         public final ImageView bookCover;
@@ -32,9 +49,7 @@ public class BookListAdapter extends CursorAdapter {
         }
     }
 
-    public BookListAdapter(Context context, Cursor c, int flags) {
-        super(context, c, flags);
-    }
+
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
@@ -42,7 +57,11 @@ public class BookListAdapter extends CursorAdapter {
         ViewHolder viewHolder = (ViewHolder) view.getTag();
 
         String imgUrl = cursor.getString(cursor.getColumnIndex(AlexandriaContract.BookEntry.IMAGE_URL));
-        new DownloadImage(viewHolder.bookCover).execute(imgUrl);
+        Glide.with(mContext)
+                .load(imgUrl)
+                .error(R.drawable.cover_not_available)
+                .crossFade()
+                .into(viewHolder.bookCover);
 
         String bookTitle = cursor.getString(cursor.getColumnIndex(AlexandriaContract.BookEntry.TITLE));
         viewHolder.bookTitle.setText(bookTitle);
@@ -59,5 +78,16 @@ public class BookListAdapter extends CursorAdapter {
         view.setTag(viewHolder);
 
         return view;
+    }
+
+    @Override
+    public Cursor swapCursor(Cursor newCursor) {
+
+        // show or hide the empty view, depending on empty cursor
+        if (newCursor != null) {
+            mEmptyView.setVisibility(newCursor.getCount() == 0 ? View.VISIBLE : View.GONE);
+        }
+
+        return super.swapCursor(newCursor);
     }
 }
