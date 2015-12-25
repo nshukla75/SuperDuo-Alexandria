@@ -110,6 +110,10 @@ public class BookDetail extends Fragment implements LoaderManager.LoaderCallback
         });
         // set the title of the mainactivity actionbar
         getActivity().setTitle(R.string.detail);
+        // set/keep the drawer button to home/back icon on rotation
+        if (savedInstanceState != null) {
+            ((Callbacks) getActivity()).toggleToolbarDrawerIndicator(true);
+        }
         return rootView;
     }
 
