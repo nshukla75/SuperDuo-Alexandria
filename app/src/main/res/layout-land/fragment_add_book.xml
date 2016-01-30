@@ -1,131 +1,190 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-    android:layout_height="match_parent" tools:context=".fragments.AddBook">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".fragments.AddBook">
 
     <RelativeLayout
+        android:id="@+id/eancontainer"
         android:orientation="horizontal"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_gravity="left|center_vertical">
+        android:layout_alignParentTop="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
         <EditText
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
             android:inputType="number"
-            android:minEms="@integer/ean_width"
             android:id="@+id/ean"
             android:saveEnabled="true"
-            android:textIsSelectable="false"
             android:maxLength="@integer/ean_size"
             android:hint="@string/input_hint"
-            android:layout_marginLeft="40dp"
-            android:layout_marginStart="40dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginRight="4dp"
+            android:layout_marginEnd="4dp"
             android:maxLines="1"
-            android:layout_marginTop="30dp"
-            android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"/>
-
+            android:layout_alignParentStart="true"
+            android:imeOptions="actionDone"/>
+        <ImageButton
+            android:id="@+id/search_button"
+            android:contentDescription="@string/search"
+            android:layout_toRightOf="@+id/ean"
+            android:layout_toEndOf="@+id/ean"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            style="?android:attr/buttonBarButtonStyle"
+            android:src="@drawable/ic_action_search"/>
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/scan_button"
             android:id="@+id/scan_button"
-            android:layout_marginLeft="23dp"
-            android:layout_marginStart="23dp"
-            android:layout_alignBottom="@+id/ean"
-            android:layout_toRightOf="@+id/ean"
-            android:layout_toEndOf="@+id/ean"/>
+            android:layout_toEndOf="@+id/search_button"
+            android:layout_toRightOf="@+id/search_button"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"/>
+    </RelativeLayout>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/bookTitle"
-            android:textSize="@dimen/head_line"
-            android:textIsSelectable="true"
-            android:textStyle="bold"
-            android:layout_below="@+id/scan_button"
-            android:layout_alignLeft="@+id/ean"
-            android:layout_alignStart="@+id/ean"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:layout_marginTop="10dp"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/bookSubTitle"
-            android:layout_below="@+id/bookTitle"
-            android:layout_alignLeft="@+id/bookTitle"
-            android:layout_alignStart="@+id/bookTitle"
-            android:layout_marginTop="10dp"/>
-
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/bookCover"
-            android:contentDescription="@string/book_cover"
-            android:minHeight="20dip"
-            android:minWidth="20dip"
-            android:layout_below="@+id/bookSubTitle"
-            android:layout_alignLeft="@+id/bookSubTitle"
-            android:layout_alignStart="@+id/bookSubTitle"
-            />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/authors"
-            android:textSize="@dimen/small_fontsize"
-            android:layout_marginLeft="25dp"
-            android:layout_alignTop="@+id/bookCover"
-            android:layout_toRightOf="@+id/bookCover"
-            />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/categories"
-            android:textSize="@dimen/small_fontsize"
-            android:layout_below="@+id/bookCover"
-            android:layout_alignLeft="@+id/bookCover"
-            android:layout_alignStart="@+id/bookCover"
-            android:layout_marginTop="10dp"/>
+    <!-- Preview found book -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="fill_parent"
+        android:layout_below="@+id/eancontainer"
+        android:layout_above="@+id/options">
 
         <LinearLayout
+            android:id="@+id/bookpreview"
             android:orientation="vertical"
-            android:layout_width="wrap_content"
-            android:layout_height="fill_parent"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentRight="true"
-            >
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-            <ImageButton
-                android:layout_width="wrap_content"
-                android:layout_height="fill_parent"
-                android:contentDescription="@string/cancel_button"
-                android:layout_weight="1"
-                android:src="@drawable/ic_action_discard"
-                style="?android:attr/buttonBarButtonStyle"
-                android:id="@+id/delete_button"
-                android:visibility="invisible"
-                />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/bookCover"
+                    android:contentDescription="@string/book_cover"
+                    android:layout_weight="1"
+                    android:layout_marginTop="5dp"/>
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="4"
+                    android:orientation="vertical"
+                    android:paddingTop="0dp"
+                    android:paddingStart="10dp"
+                    android:paddingLeft="10dp"
+                    android:paddingEnd="0dp"
+                    android:paddingRight="0dp"
+                    android:paddingBottom="0dp">
 
-            <ImageButton
-                android:layout_width="wrap_content"
-                android:layout_height="fill_parent"
-                android:contentDescription="@string/ok_button"
-                android:text="@string/ok_button"
-                android:layout_weight="1"
-                android:id="@+id/save_button"
-                android:visibility="invisible"
-                android:src="@drawable/ic_action_accept"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_gravity="bottom"
-                />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/bookTitle"
+                        android:maxLines="1"
+                        android:fontFamily="sans-serif-condensed"
+                        android:textSize="28sp"
+                        android:textStyle="bold"
+                        android:ellipsize="end"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/bookSubTitle"
+                        android:fontFamily="sans-serif-light"
+                        android:textSize="16sp"
+                        android:maxLines="1"
+                        android:ellipsize="end"/>
+                    <TextView
+                        android:id="@+id/bookDescription"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginBottom="10dp"
+                        android:fontFamily="sans-serif-condensed"
+                        android:textSize="14sp"
+                        android:maxLines="5"
+                        android:ellipsize="end"/>
+                <LinearLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/authors"
+                        android:layout_weight="1"
+                        android:fontFamily="sans-serif-condensed"
+                        android:gravity="top|start"
+                        android:textSize="14sp"
+                        android:maxLines="3"
+                        android:textStyle="bold"
+                        android:ellipsize="end"/>
 
-
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/categories"
+                        android:layout_weight="1"
+                        android:fontFamily="sans-serif-condensed"
+                        android:gravity="top|end"
+                        android:textSize="14sp"
+                        android:maxLines="3"
+                        android:ellipsize="end"/>
+                </LinearLayout>
+            </LinearLayout>
+            </LinearLayout>
         </LinearLayout>
+    </ScrollView>
+    <LinearLayout
+        android:id="@+id/options"
+        android:orientation="horizontal"
+        android:layout_alignParentBottom="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/delete_button"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="fill_parent"
+            android:layout_marginStart="20dp"
+            android:layout_marginLeft="20dp"
+            android:layout_gravity="start|bottom"
+            android:gravity="start|center_vertical"
+            android:text="@string/cancel_button"
+            android:textSize="18sp"
+            android:drawableStart="@drawable/ic_action_cancel"
+            android:drawableLeft="@drawable/ic_action_cancel"
+            android:visibility="invisible"
+            style="?android:attr/buttonBarButtonStyle"
+            />
+
+        <Button
+            android:id="@+id/save_button"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="fill_parent"
+            android:layout_marginEnd="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_gravity="end|bottom"
+            android:gravity="end|center_vertical"
+            android:text="@string/ok_button"
+            android:textSize="18sp"
+            android:drawableEnd="@drawable/ic_action_accept"
+            android:drawableRight="@drawable/ic_action_accept"
+            android:visibility="invisible"
+            style="?android:attr/buttonBarButtonStyle"
+            />
+
+    </LinearLayout>
 
     </RelativeLayout>
-</FrameLayout>
+

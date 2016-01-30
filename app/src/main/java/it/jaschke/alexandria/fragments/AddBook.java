@@ -22,9 +22,12 @@ import android.widget.Toast;
 
 
 import com.bumptech.glide.Glide;
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 
 import it.jaschke.alexandria.R;
 import it.jaschke.alexandria.Utility;
+import it.jaschke.alexandria.activities.ScanActivity;
 import it.jaschke.alexandria.data.AlexandriaContract;
 import it.jaschke.alexandria.services.BookService;
 
@@ -32,7 +35,7 @@ import it.jaschke.alexandria.services.BookService;
 public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
     // reference to the ean search field
-    private EditText ean;
+    private EditText mEanSearchField;
     // unique id for the loadermanager
     private final int LOADER_ID = 30;
     private View rootView;
@@ -54,8 +57,8 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        if(ean!=null) {
-            outState.putString(EAN_CONTENT, ean.getText().toString());
+        if(mEanSearchField!=null) {
+            outState.putString(EAN_CONTENT, mEanSearchField.getText().toString());
         }
     }
 
@@ -73,8 +76,8 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
         // get the add book fragment
         rootView = inflater.inflate(R.layout.fragment_add_book, container, false);
         // get the edittext input field and attach text changed listener
-        ean = (EditText) rootView.findViewById(R.id.ean);
-        ean.addTextChangedListener(new TextWatcher() {
+        mEanSearchField = (EditText) rootView.findViewById(R.id.ean);
+        mEanSearchField.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
                 //no need
@@ -97,7 +100,7 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
             }
         });
         // submit on enter
-        ean.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+        mEanSearchField.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (((event != null) &&
@@ -107,7 +110,7 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
                     // force a submit
                     handleSubmit(true);
                     // keep the focus on the textfield
-                    ean.requestFocus();
+                    mEanSearchField.requestFocus();
                 }
                 return true;
             }
@@ -119,7 +122,7 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
                 // force a submit
                 handleSubmit(true);
                 // set the focus on the textfield
-                ean.requestFocus();
+                mEanSearchField.requestFocus();
             }
         });
         // get the scan button and attach the onclick to launch the scanner
@@ -127,9 +130,15 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
             @Override
             public void onClick(View v) {
                 // TODO: launch the barcode scanner,when done, remove the toast below.
-                CharSequence text = "This button should let you scan a book for its barcode!";
-                Toast.makeText(getActivity(), text, Toast.LENGTH_SHORT).show();
+                //CharSequence text = "This button should let you scan a book for its barcode!";
+                // launch the barcode scanner
+                if (Utility.isNetworkAvailable(getActivity())) {
+                    scanBarcode();
+                } else {
+                    Toast.makeText(getActivity(), getString(R.string.network_required_notice), Toast.LENGTH_SHORT).show();
+                }
             }
+
         });
         // get the save button and attach the onclick handler to save the book to the database
         rootView.findViewById(R.id.save_button).setOnClickListener(new View.OnClickListener() {
@@ -137,11 +146,11 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
             public void onClick(View view) {
                 // send message to bookservice to save the book
                 Intent bookIntent = new Intent(getActivity(), BookService.class);
-                bookIntent.putExtra(BookService.EAN, ean.getText().toString());
+                bookIntent.putExtra(BookService.EAN, mEanSearchField.getText().toString());
                 bookIntent.setAction(BookService.CONFIRM_BOOK);
                 getActivity().startService(bookIntent);
                 // clear the search field
-                ean.setText("");
+                mEanSearchField.setText("");
             }
         });
         // get the delete button and attach the onclick handler to let the mainactivity delete a
@@ -149,7 +158,7 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
         rootView.findViewById(R.id.delete_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ean.setText("");
+                mEanSearchField.setText("");
             }
         });
         // load previously values from instancestate, if available
@@ -158,15 +167,15 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
             String tempEan = savedInstanceState.getString(EAN_CONTENT);
             if (tempEan != null) {
                 if (!tempEan.equals("")) {
-                    ean.setText(tempEan);
-                    ean.setHint("");
+                    mEanSearchField.setText(tempEan);
+                    mEanSearchField.setHint("");
                 }
             }
         }
         // set the toolbar title field
         getActivity().setTitle(R.string.scan);
         // set the focus on the edittext field
-        ean.requestFocus();
+        mEanSearchField.requestFocus();
         return rootView;
     }
 
@@ -177,7 +186,7 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
     private void handleSubmit(boolean forced) {
 
         // get the value entered in the searchfield
-        String tempEan = ean.getText().toString().trim();
+        String tempEan = mEanSearchField.getText().toString().trim();
 
         // check if an isbn number was entered
         if ((tempEan.length() == 10) || (tempEan.length() == 13)) {
@@ -232,9 +241,9 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
      */
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        if(ean.getText().length()>0){
+        if(mEanSearchField.getText().length()>0){
             // get the string value from the ean search field
-            String eanStr= ean.getText().toString();
+            String eanStr= mEanSearchField.getText().toString();
             // add prefix if entered value length is 10
             if(eanStr.length()==10 && !eanStr.startsWith(mEanPrefix)){
                 eanStr = mEanPrefix + eanStr;
@@ -326,6 +335,57 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
             rootView.findViewById(R.id.bookCover).setVisibility(View.INVISIBLE);
             rootView.findViewById(R.id.save_button).setVisibility(View.INVISIBLE);
             rootView.findViewById(R.id.delete_button).setVisibility(View.INVISIBLE);
+        }
+    }
+
+    /**
+     * Scan a ISBN book barcode using the zxing library
+     */
+    private void scanBarcode() {
+
+        // create the intent integrator to scan in the current fragment
+        IntentIntegrator integrator = IntentIntegrator.forSupportFragment(this);
+
+        // use a custom scanactivity that can be rotated
+        integrator.setCaptureActivity(ScanActivity.class);
+        integrator.setOrientationLocked(false);
+
+        // limit scanning to only one-dimensional barcodes
+        integrator.setDesiredBarcodeFormats(IntentIntegrator.ONE_D_CODE_TYPES);
+
+        // set the prompt message
+        integrator.setPrompt(getString(R.string.scanner_prompt));
+
+        // launch the scanner
+        integrator.initiateScan();
+    }
+
+    /**
+     * Catch the result of a scanned barcode
+     * @param requestCode int
+     * @param resultCode int
+     * @param data Intent
+     */
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        // parse the result in a intentresult object
+        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+
+        if(result != null) {
+            if(result.getContents() == null) {
+                Toast.makeText(getActivity(), getString(R.string.scanner_cancelled), Toast.LENGTH_SHORT).show();
+            } else {
+
+                // get the scanned code and code format
+                String ean = result.getContents();
+
+                // inform the user about the ean number
+                Toast.makeText(getActivity(),"Scanned barcode: "+ ean, Toast.LENGTH_SHORT).show();
+
+                // once we have an isbn, add it to the search field (this will trigger the bookservice call)
+                mEanSearchField.setText(ean);
+            }
         }
     }
 

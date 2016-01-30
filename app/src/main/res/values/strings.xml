@@ -39,7 +39,7 @@
 
     <!-- Buttons -->
     <string name="scan_button">Scan a barcode</string>
-    <string name="ok_button">Next</string>
+    <string name="ok_button">Save</string>
     <string name="cancel_button">Cancel</string>
     <string name="not_found">No Book found</string>
     <string name="search">Search a book</string>
