@@ -1,7 +1,5 @@
 package it.jaschke.alexandria.fragments;
 
-import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -29,7 +27,6 @@ import it.jaschke.alexandria.R;
 import it.jaschke.alexandria.Utility;
 import it.jaschke.alexandria.data.AlexandriaContract;
 import it.jaschke.alexandria.services.BookService;
-import it.jaschke.alexandria.services.DownloadImage;
 
 
 public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
@@ -199,13 +196,13 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
                 } else {
                     if (forced) {
                         // show toast when we don't have a network connection
-                        Toast.makeText(getActivity(), getString(R.string.network_required_notice),Toast.LENGTH_SHORT);
+                        Toast.makeText(getActivity(), getString(R.string.network_required_notice),Toast.LENGTH_SHORT).show();
                     }
                 }
             }
         } else if (forced) {
             // show toast when no text was entered
-            Toast.makeText(getActivity(), getString(R.string.text_input_required),Toast.LENGTH_SHORT);
+            Toast.makeText(getActivity(), getString(R.string.text_input_required),Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -262,7 +259,7 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
      * @param data Cursor
      */
     @Override
-    public void onLoadFinished(android.support.v4.content.Loader<Cursor> loader, Cursor data) {
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         if (data.moveToFirst()) {
             // populate the view items
             View view = getView();
