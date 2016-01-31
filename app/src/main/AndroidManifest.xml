@@ -29,6 +29,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- ScanActivity -->
+        <activity android:name=".activities.ScanActivity"
+            android:screenOrientation="fullSensor"
+            android:stateNotNeeded="true"
+            android:theme="@style/zxing_CaptureTheme"
+            android:windowSoftInputMode="stateAlwaysHidden"
+            >
+        </activity>
         <activity
             android:label="@string/title_activity_settings"
             android:name=".activities.SettingsActivity"
