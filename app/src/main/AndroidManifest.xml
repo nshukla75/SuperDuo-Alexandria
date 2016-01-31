@@ -30,7 +30,6 @@
             </intent-filter>
         </activity>
 
-        <!-- ScanActivity -->
         <activity android:name=".activities.ScanActivity"
             android:screenOrientation="fullSensor"
             android:stateNotNeeded="true"
@@ -38,6 +37,7 @@
             android:windowSoftInputMode="stateAlwaysHidden"
             >
         </activity>
+
         <activity
             android:label="@string/title_activity_settings"
             android:name=".activities.SettingsActivity"
@@ -48,16 +48,16 @@
                 android:value=".activities.MainActivity" />
         </activity>
 
-
-
         <provider
             android:name=".data.BookProvider"
             android:authorities="it.jaschke.alexandria"
             android:exported="false" />
+
         <service
             android:name=".services.BookService"
             android:exported="false" >
         </service>
+
     </application>
 
 </manifest>
