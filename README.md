@@ -5,7 +5,7 @@
   - Alexandria does not crash while searching for a book without an internet connection. 
   - Alexandria’s barcode scanning functionality does not require the installation of a separate app on first use.
 
-#Execution Instruction
+#Execution Instructions
 Requires: Android Studio v1.5.0+
 
 Dependencies:
